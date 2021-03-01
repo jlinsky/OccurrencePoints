@@ -43,10 +43,10 @@
 # Load libraries
 ################################################################################
 
-# rm(list=ls())
+#rm(list=ls())
 my.packages <- c('plyr', 'tidyverse', 'rgbif', 'data.table', 'taxize',
   'anchors', 'batchtools', 'textclean', 'stringi', 'devtools','rredlist')
-# install.packages (my.packages) #Turn on to install current versions
+ #install.packages (my.packages) #Turn on to install current versions
 lapply(my.packages, require, character.only=TRUE)
 rm(my.packages)
 
@@ -99,7 +99,7 @@ synonyms.compiled <- function(syn_output,db_name){
 families <- c("Magnoliaceae")
 
 # read in taxa list
-taxa_list_acc <- read.csv(file.path(main_dir,
+taxa_list_acc <- read.csv(file.path(main_dir,"inputs","taxa_list",
   "all_Magnolia_taxa.csv"), header = T, colClasses="character")
 nrow(taxa_list_acc) #335
 # make sure there aren't extra spaces within species names
@@ -337,46 +337,6 @@ taxa_names <- gsub(" ssp. "," subsp. ",taxa_names)
 
 ## GET TAXONOMIC STATUS AND SYNONYMS
 
-pow_names <- data.frame()
-pow_syn <- data.frame()
-for(i in 1:length(taxa_names)){
-  id <- get_pow(taxa_names[[i]])[1]
-  if(!is.na(id)){
-    output_new <- pow_lookup(id)
-    if(length(output_new$meta$authors>0)){
-      acc <- data.frame(
-        "taxon_name_match" = output_new$meta$name,
-        "match_id" = output_new$meta$fqId,
-        "acceptance" = output_new$meta$taxonomicStatus,
-        "author" = output_new$meta$authors,
-        "taxon_name_acc" = taxa_names[[i]]
-      )
-    }else{
-      acc <- data.frame(
-        "taxon_name_match" = output_new$meta$name,
-        "match_id" = output_new$meta$fqId,
-        "acceptance" = output_new$meta$taxonomicStatus,
-        #"author" = output_new$meta$authors,
-        "taxon_name_acc" = taxa_names[[i]]
-      )}
-    not_acc <- data.frame(output_new$meta$accepted)
-    if(length(not_acc)>0){
-      acc <- data.frame(
-        "taxon_name_match" = output_new$meta$accepted$name,
-        "match_id" = output_new$meta$accepted$fqId,
-        "acceptance" = output_new$meta$taxonomicStatus,
-        "author" = output_new$meta$accepted$author,
-        "taxon_name_acc" = taxa_names[[i]]
-      )
-    }
-    syn <- data.frame(output_new$meta$synonyms)
-    if(length(syn)>0){
-      syn$taxon_name_acc <- taxa_names[[i]]
-    }
-    pow_names <- rbind.fill(pow_names,acc)
-    pow_syn <- rbind.fill(pow_syn,syn)
-  }
-}
 
 # !!
 # !! STOP BEFORE RUNNING NEXT SECTION -- YOU MAY HAVE TO ANSWER SOME PROMPTS
@@ -639,7 +599,7 @@ head(rl_all)
 #   PLACE IN "taxa_list" FOLDER
 
 # read in data
-wcvp <- read.delim(file.path(main_dir,
+wcvp <- read.delim(file.path(main_dir,"inputs","taxa_list",
   "wcvp_v3_nov_2020.txt"),colClasses="character",sep="|")
 head(wcvp)
 
