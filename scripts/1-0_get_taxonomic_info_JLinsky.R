@@ -46,7 +46,7 @@
 #rm(list=ls())
 my.packages <- c('plyr', 'tidyverse', 'rgbif', 'data.table', 'taxize',
   'anchors', 'batchtools', 'textclean', 'stringi', 'devtools','rredlist')
- #install.packages (my.packages) #Turn on to install current versions
+# install.packages (my.packages) #Turn on to install current versions
 lapply(my.packages, require, character.only=TRUE)
 rm(my.packages)
 
@@ -105,7 +105,7 @@ nrow(taxa_list_acc) #335
 # make sure there aren't extra spaces within species names
 taxa_list_acc[,1] <- str_squish(taxa_list_acc[,1])
 # create list of target taxa names
-taxa_names <- taxa_list_acc[,1]
+#taxa_names <- taxa_list_acc[,1]
   # use this instead if you want to select names based on values in other col:
   taxa_names_sel <- taxa_list_acc[which(taxa_list_acc$taxon_name_acc_type != "cultivar"),]
   taxa_names <- taxa_names_sel[,1]
@@ -127,7 +127,7 @@ length(species_names) #335
 # create list of target species names only, with hybrids removed
 species_only <- species_names[
   !grepl(" x ",species_names)]
-length(species_only) #335
+length(species_only) #135
 
 ################################################################################
 # 2. Find taxonomic status and synonyms for target taxa
@@ -337,6 +337,46 @@ taxa_names <- gsub(" ssp. "," subsp. ",taxa_names)
 
 ## GET TAXONOMIC STATUS AND SYNONYMS
 
+pow_names <- data.frame()
+pow_syn <- data.frame()
+for(i in 1:length(taxa_names)){
+  id <- get_pow(taxa_names[[i]])[1]
+  if(!is.na(id)){
+    output_new <- pow_lookup(id)
+    if(length(output_new$meta$authors>0)){
+      acc <- data.frame(
+        "taxon_name_match" = output_new$meta$name,
+        "match_id" = output_new$meta$fqId,
+        "acceptance" = output_new$meta$taxonomicStatus,
+        "author" = output_new$meta$authors,
+        "taxon_name_acc" = taxa_names[[i]]
+      )
+    }else{
+      acc <- data.frame(
+        "taxon_name_match" = output_new$meta$name,
+        "match_id" = output_new$meta$fqId,
+        "acceptance" = output_new$meta$taxonomicStatus,
+        #"author" = output_new$meta$authors,
+        "taxon_name_acc" = taxa_names[[i]]
+      )}
+    not_acc <- data.frame(output_new$meta$accepted)
+    if(length(not_acc)>0){
+      acc <- data.frame(
+        "taxon_name_match" = output_new$meta$accepted$name,
+        "match_id" = output_new$meta$accepted$fqId,
+        "acceptance" = output_new$meta$taxonomicStatus,
+        "author" = output_new$meta$accepted$author,
+        "taxon_name_acc" = taxa_names[[i]]
+      )
+    }
+    syn <- data.frame(output_new$meta$synonyms)
+    if(length(syn)>0){
+      syn$taxon_name_acc <- taxa_names[[i]]
+    }
+    pow_names <- rbind.fill(pow_names,acc)
+    pow_syn <- rbind.fill(pow_syn,syn)
+  }
+}
 
 # !!
 # !! STOP BEFORE RUNNING NEXT SECTION -- YOU MAY HAVE TO ANSWER SOME PROMPTS
@@ -599,7 +639,7 @@ head(rl_all)
 #   PLACE IN "taxa_list" FOLDER
 
 # read in data
-wcvp <- read.delim(file.path(main_dir,"inputs","taxa_list",
+wcvp <- read.delim(file.path(main_dir, "inputs","taxa_list",
   "wcvp_v3_nov_2020.txt"),colClasses="character",sep="|")
 head(wcvp)
 
@@ -666,7 +706,7 @@ wcvp_all$database <- "wcvp"
 #   AND PLACE IN "taxa_list" FOLDER
 
 # read in data
-wfo <- read.delim(file.path(main_dir,"inputs","taxa_list",
+wfo <- read.delim(file.path(main_dir, "inputs","taxa_list",
   "WFO_Backbone_v.2019.05","classification.txt"),colClasses="character")
 head(wfo)
 
@@ -734,7 +774,7 @@ wfo_all$database <- "wfo"
 
 # create dataframe of all data found
   ## !!! change this list to reflect the sources you're using
-datasets <- list(itis_all,pow_all,tpl_all,wfo_all) #,gbif_all,rl_all,wcvp_all,tp_all
+datasets <- list(itis_all,pow_all,tpl_all,tp_all,wcvp_all,wfo_all,rl_all) #,gbif_all
 all_data_raw <- Reduce(rbind.fill,datasets)
 all_data <- all_data_raw
   names(all_data)
