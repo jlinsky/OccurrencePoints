@@ -666,7 +666,7 @@ wcvp_all$database <- "wcvp"
 #   AND PLACE IN "taxa_list" FOLDER
 
 # read in data
-wfo <- read.delim(file.path(main_dir,
+wfo <- read.delim(file.path(main_dir,"inputs","taxa_list",
   "WFO_Backbone_v.2019.05","classification.txt"),colClasses="character")
 head(wfo)
 
@@ -734,7 +734,7 @@ wfo_all$database <- "wfo"
 
 # create dataframe of all data found
   ## !!! change this list to reflect the sources you're using
-datasets <- list(itis_all,tpl_all,wfo_all) #,gbif_all,rl_all,wcvp_all,tp_all,pow_all
+datasets <- list(itis_all,pow_all,tpl_all,wfo_all) #,gbif_all,rl_all,wcvp_all,tp_all
 all_data_raw <- Reduce(rbind.fill,datasets)
 all_data <- all_data_raw
   names(all_data)
