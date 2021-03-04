@@ -43,7 +43,7 @@
 # Load libraries
 ################################################################################
 
-# rm(list=ls())
+ #rm(list=ls())
 my.packages <- c('plyr', 'tidyverse', 'rgbif', 'data.table', 'taxize',
   'anchors', 'batchtools', 'textclean', 'stringi', 'devtools','rredlist')
 # install.packages (my.packages) #Turn on to install current versions
@@ -55,7 +55,7 @@ rm(my.packages)
 ################################################################################
 
 # either set manually:
-#main_dir <- "/Volumes/GoogleDrive/My Drive/Conservation Consortia/R Training/occurrence_points"
+main_dir <- "C:/Users/Jean Linsky/Documents/Magnolia_Coordinator/Statistics_and_R"
 #script_dir <- "./Documents/GitHub/OccurrencePoints/scripts"
 
 # or use 0-1_set_workingdirectory.R script:
@@ -93,15 +93,15 @@ synonyms.compiled <- function(syn_output,db_name){
 
 # CHANGE THIS LIST OF FAMILIES BASED ON TAXA YOURE LOOKING FOR:
 #tpl_families() # list of families in database
-families <- c("Fagaceae","Rosaceae","Ulmaceae","Malvaceae")
+#families <- c("Fagaceae","Rosaceae","Ulmaceae","Malvaceae")
 #families <- "Sapindaceae"
 #families <- c("Juglandaceae","Fagaceae","Leguminosae","Lauraceae","Pinaceae","Taxaceae")
-#families <- c("Fagaceae","Magnoliaceae")
+families <- c("Magnoliaceae")
 
 # read in taxa list
 taxa_list_acc <- read.csv(file.path(main_dir,"inputs","taxa_list",
-  "target_taxa.csv"), header = T, colClasses="character")
-nrow(taxa_list_acc) #191
+  "all_Magnolia_taxa.csv"), header = T, colClasses="character")
+nrow(taxa_list_acc) #335
 # make sure there aren't extra spaces within species names
 taxa_list_acc[,1] <- str_squish(taxa_list_acc[,1])
 # create list of target taxa names
@@ -109,7 +109,7 @@ taxa_names <- taxa_list_acc[,1]
   # use this instead if you want to select names based on values in other col:
   #taxa_names_sel <- taxa_list_acc[which(taxa_list_acc$taxon_name_acc_type != "cultivar"),]
   #taxa_names <- taxa_names_sel[,1]
-length(taxa_names) #191
+length(taxa_names) #335
 
 ## OR: you can create vector of taxa names here instead of reading in
 #taxa_names <- c("Quercus fabrei","Quercus fabri","Magnolia albosericea",
@@ -120,12 +120,12 @@ species_names <- taxa_names[
   !grepl(" var. ",taxa_names) &
   !grepl(" subsp.",taxa_names) &
   !grepl(" f. ",taxa_names)]
-length(species_names) #191
+length(species_names) #335 
 
 # create list of target species names only, with hybrids removed
 species_only <- species_names[
   !grepl(" x ",species_names)]
-length(species_only) #191
+length(species_only) #135
 
 ################################################################################
 # 2. Find taxonomic status and synonyms for target taxa
@@ -775,12 +775,12 @@ wfo_all$database <- "wfo"
 ################################################################################
 
 ## save taxonomic backbone query results for later reference, if needed
-save(itis_all,pow_all,tpl_all,tp_all,wcvp_all,wfo_all,rl_all,
+save(itis_all,pow_all,tpl_all,wcvp_all,wfo_all,#rl_all,tp_all 
  file=file.path(main_dir, "inputs", "taxa_list", "raw_backbone_queries.RData"))
 
 # create dataframe of all data found
   ## !!! change this list to reflect the sources you're using
-datasets <- list(itis_all,pow_all,tpl_all,tp_all,wcvp_all,wfo_all,rl_all) #,gbif_all
+datasets <- list(itis_all,pow_all,tpl_all,wcvp_all,wfo_all) #,gbif_all, tp_all, rl_all
 all_data_raw <- Reduce(rbind.fill,datasets)
 all_data <- all_data_raw
   names(all_data)
@@ -871,7 +871,7 @@ all_data <- all_data %>%
 head(all_data)
 # write file
 write.csv(all_data,file.path(main_dir,"inputs","taxa_list",
-  "target_taxa_with_syn_all.csv"),row.names=F)
+  "all_Magnolia_taxa_with_syn_all.csv"),row.names=F)
 
 ################################################################################
 # 4. Automatically pare down list, if desired
@@ -912,5 +912,5 @@ all_data_final <- all_data %>%
          taxon_name = taxon_name_match)
 head(all_data_final)
 # write file
-write.csv(all_data_final,file.path(main_dir,"inputs","taxa_list",
-  "target_taxa_with_syn_filtered.csv"),row.names=F)
+write.csv(all_data,file.path(main_dir,"inputs","taxa_list",
+  "all_Magnolia_taxa_with_syn_filtered.csv"),row.names=F)
