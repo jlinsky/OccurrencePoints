@@ -38,7 +38,7 @@ my.packages <- c("raster", "sp", "tools", "spatialEco", "rgdal", "geosphere",
   "rnaturalearthhires")#, "sf"
 # you may need to run this too:
 devtools::install_github("ropensci/rnaturalearthhires")
-#install.packages(my.packages) #Turn on to install current versions
+install.packages(my.packages) #Turn on to install current versions
 lapply(my.packages, require, character.only=TRUE)
   rm(my.packages)
 
@@ -47,7 +47,7 @@ lapply(my.packages, require, character.only=TRUE)
 ################################################################################
 
 # either set manually:
-main_dir <- "/Volumes/GoogleDrive/My Drive/Conservation Consortia/R Training/occurrence_points"
+main_dir <- "C:/Users/Jean Linsky/Documents/Magnolia_Coordinator/Statistics_and_R"
 #script_dir <- "./Documents/GitHub/OccurrencePoints/scripts"
 
 # or use 0-1_set_workingdirectory.R script:
@@ -68,11 +68,11 @@ main_dir <- "/Volumes/GoogleDrive/My Drive/Conservation Consortia/R Training/occ
 
 # read in taxa list
 taxon_list <- read.csv(file.path(main_dir,"inputs","taxa_list",
-  "target_taxa_with_syn.csv"), header = T, na.strings=c("","NA"),
+  "all_Magnolia_taxa_with_syn_filtered.csv"), header = T, na.strings=c("","NA"),
   colClasses="character")
 # keep only taxa with accepted species name
 taxon_list <- taxon_list %>% filter(!is.na(species_name_acc))
-  nrow(taxon_list) #636
+  nrow(taxon_list) #1094
 
 # create new folder if not already present
 if(!dir.exists(file.path(main_dir,"inputs","known_distribution")))
@@ -141,12 +141,20 @@ head(gts_list)
 taxon_list <- left_join(taxon_list, gts_list[,c(2,4,5)],
   by=c("species_name_acc" = "taxon"))
 
+##write out just the GTS results
+#write.csv(gts_list, file.path(main_dir,"inputs","known_distribution",
+#"all_taxa_with_native_dist_GTS.csv"),row.names=F)
+
 ### IUCN Red List (RL)
 
 ## ! you first need an API key ! run the following line and fill out
 #   the necessary online form to receive a key, then follow the instructions
 #   to add to your R environment:
 rl_use_iucn()
+
+usethis::edit_r_environ()
+IUCN_REDLIST_KEY='b66b2711148760e4119153dc3f68dc32cd271830c24f69e227c2964485f4444e'
+
 # use rredlist package to get taxon names and country-level spp. dist.
 # can take a little while if lots of species
 countries <- data.frame()
@@ -201,6 +209,8 @@ native_dist[is.na(native_dist$rl_native_dist),]$species_name_acc
 # write taxon list with GTS and RL distribution information
 write.csv(native_dist, file.path(main_dir,"inputs","known_distribution",
     "target_taxa_with_native_dist.csv"),row.names=F)
+
+
 
 ################################################################################
 # 2. Download polygon data for countries, states, counties
